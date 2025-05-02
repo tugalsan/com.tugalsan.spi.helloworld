@@ -1,0 +1,4 @@
+--patch-module
+com.tugalsan.spi.helloworld=_
+--add-reads
+com.tugalsan.spi.helloworld=ALL-UNNAMED
