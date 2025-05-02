@@ -3,6 +3,8 @@ package com.tugalsan.spi.helloworld;
 import com.tugalsan.api.function.client.maythrowexceptions.unchecked.TGS_FuncMTU_In1;
 import com.tugalsan.api.log.server.*;
 import com.tugalsan.api.network.server.TS_NetworkSSLUtils;
+import com.tugalsan.api.sql.basic.client.TGS_SQLBasicConfig;
+import com.tugalsan.api.sql.basic.server.TS_SQLBasicUtils;
 import com.tugalsan.api.sql.conn.server.TS_SQLConnAnchor;
 import com.tugalsan.api.sql.select.server.TS_SQLSelectUtils;
 import com.tugalsan.api.string.client.TGS_StringUtils;
@@ -32,13 +34,22 @@ public class AppServlet implements ServletContextListener {
             d.ce("contextInitialized", u_dbConfig.excuse().getMessage());
             return;
         }
+        var anchor = u_dbConfig.value();
+        d.ci("contextInitialized", "anchor", anchor);
+
         d.ci("contextInitialized", "reading table values...");
-        TS_SQLSelectUtils.select(u_dbConfig.value(), "aktif").columnsAll()
+        TS_SQLSelectUtils.select(anchor, "aktif").columnsAll()
                 .whereConditionNone().groupNone().orderNone()
                 .rowIdxOffsetNone().rowSizeLimitNone()
                 .walkRows(TGS_FuncMTU_In1.empty, (rs, ri) -> {
                     d.cr("contextInitialized", "aktif", "walkRows", ri, rs.lng.get(0), rs.str.get(1));
                 });
+
+        var basicConfigCommon = new TGS_SQLBasicConfig("common", "LNG_ID", "STR254_ADI", "BYTESSTR_VALUE");
+        d.ci("contextInitialized", "basicConfigCommon", basicConfigCommon);
+
+        TS_SQLBasicUtils.createCommonTableIfNotExists(anchor, basicConfigCommon);
+        d.ci("contextInitialized", "done...");
     }
 
     @Override
